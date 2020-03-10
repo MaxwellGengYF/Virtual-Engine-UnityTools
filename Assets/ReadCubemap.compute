@@ -1,0 +1,31 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#pragma kernel TexCopy
+
+TextureCube<float4> _MainTex; SamplerState sampler_MainTex;
+Texture2D<float4> _MainTex2D;SamplerState sampler_MainTex2D;
+uint _Count;
+uint _TargetMipLevel;
+RWStructuredBuffer<float4> _ResultBuffer;
+float4 _Directions[4];
+
+[numthreads(8,8,1)]
+void CSMain (uint2 id : SV_DispatchThreadID)
+{
+    if(id.x >= _Count || id.y >= _Count) return;
+    float2 uv = (id + 0.5) / _Count;
+    float3 left = lerp(_Directions[0].xyz, _Directions[2].xyz, uv.y);
+    float3 right = lerp(_Directions[1].xyz, _Directions[3].xyz, uv.y);
+    float3 dir = normalize(lerp(left, right, uv.x));
+    _ResultBuffer[id.y * _Count + id.x] = pow(_MainTex.SampleLevel(sampler_MainTex, dir, _TargetMipLevel), 1/2.2);
+}
+
+float4 _TextureSize;
+[numthreads(8, 8, 1)]
+void TexCopy(uint2 id : SV_DISPATCHTHREADID)
+{
+    if(id.x >= _TextureSize.x || id.y >= _TextureSize.y)
+        return;
+    float2 uv = (id.xy + 0.5) / _TextureSize.zw;
+    _ResultBuffer[id.y * _Count + id.x] = _MainTex2D.SampleLevel(sampler_MainTex2D, uv, _TargetMipLevel);
+}

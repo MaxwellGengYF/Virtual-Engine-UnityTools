@@ -1,0 +1,12 @@
+.vs/
+x64/
+Resource/
+Textures/
+Debug/
+*.7z
+*.zip
+*.rar
+Library/
+Logs/
+obj/
+Temp/

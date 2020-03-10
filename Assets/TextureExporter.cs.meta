@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1a30e2827888eaa48bfa0603b4f0e2f3
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - readCS: {fileID: 7200000, guid: 9547c7168e514bf4e901cdf663008f2f, type: 3}
+  - bc6Compress: {fileID: 7200000, guid: 21ed29a837307a6458ab73666076aba8, type: 3}
+  - bc7Compress: {fileID: 7200000, guid: 81d86ed47f566db4296d1fe32f960a08, type: 3}
+  - texture: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
