@@ -89,14 +89,18 @@
     <Compile Include="Assets\GeneralUtility\ShaderIDs.cs" />
     <Compile Include="Assets\GeneralUtility\Singleton.cs" />
     <Compile Include="Assets\GeneralUtility\StringUtility.cs" />
+    <Compile Include="Assets\Jobs\JobStruct.cs" />
     <Compile Include="Assets\MaterialExporter.cs" />
     <Compile Include="Assets\MeshExporter.cs" />
     <Compile Include="Assets\Test.cs" />
     <Compile Include="Assets\TextureExporter.cs" />
     <Compile Include="Assets\TransformExporter.cs" />
+    <Compile Include="Assets\VirtualTexture\VTTestComponent.cs" />
     <None Include="Assets\BC6Compress.compute" />
     <None Include="Assets\BC7Compress.compute" />
     <None Include="Assets\ReadCubemap.compute" />
+    <None Include="Assets\VirtualTexture\VTTester.shader" />
+    <None Include="Assets\VirtualTexture\VirtualSampler.cginc" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/MEngine-Unity/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
