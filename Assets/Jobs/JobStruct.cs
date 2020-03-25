@@ -12,12 +12,10 @@ namespace VEngine
 
     public unsafe struct JobBucket
     {
-        private fixed ulong arr[6];//48
     }
 
     public unsafe struct JobSystem
-    {
-        private fixed ulong arr[106];//848
+    { 
     }
 
     public static unsafe class Job

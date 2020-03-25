@@ -63,7 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\DXTCompress.cs" />
+    <Compile Include="Assets\DLLImport.cs" />
     <Compile Include="Assets\EasyButtons\ButtonAttribute.cs" />
     <Compile Include="Assets\GPUCompuress.cs" />
     <Compile Include="Assets\GeneralUtility\AlignedArray.cs" />
@@ -90,8 +90,11 @@
     <Compile Include="Assets\GeneralUtility\Singleton.cs" />
     <Compile Include="Assets\GeneralUtility\StringUtility.cs" />
     <Compile Include="Assets\Jobs\JobStruct.cs" />
+    <Compile Include="Assets\MJsonUtility.cs" />
     <Compile Include="Assets\MaterialExporter.cs" />
     <Compile Include="Assets\MeshExporter.cs" />
+    <Compile Include="Assets\SceneExporter.cs" />
+    <Compile Include="Assets\TerrainPacker.cs" />
     <Compile Include="Assets\Test.cs" />
     <Compile Include="Assets\TextureExporter.cs" />
     <Compile Include="Assets\TransformExporter.cs" />
@@ -100,6 +103,7 @@
     <None Include="Assets\BC7Compress.compute" />
     <None Include="Assets\ReadCubemap.compute" />
     <None Include="Assets\VirtualTexture\VTTester.shader" />
+    <None Include="Assets\ShouShouPBR.shader" />
     <None Include="Assets\VirtualTexture\VirtualSampler.cginc" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/MEngine-Unity/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>

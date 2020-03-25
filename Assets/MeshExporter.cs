@@ -33,10 +33,19 @@ struct IndexSettings
 
 public unsafe class MeshExporter : MonoBehaviour
 {
-    public Mesh[] meshes;
+    public List<Mesh> meshes;
 
     [EasyButtons.Button]
-    void ExportAllMeshes()
+    void Export()
+    {
+        List<string> str = new List<string>(meshes.Count);
+        foreach(var i in meshes)
+        {
+            str.Add(i.name);
+        }
+        ExportAllMeshes(meshes, str);
+    }
+    public void ExportAllMeshes(List<Mesh> meshes, List<string> names)
     {
         List<byte> bytes = new List<byte>(1000);
         void InputInteger(uint inte)
@@ -123,8 +132,9 @@ public unsafe class MeshExporter : MonoBehaviour
                 InputVec4(j);
             }
         }
-        foreach (var i in meshes)
+        for(int c = 0; c < meshes.Count; c++)
         {
+            var i = meshes[c];
             uint typeNum = 0;
             bytes.Clear();
             uint3 header = 0;
@@ -231,7 +241,7 @@ public unsafe class MeshExporter : MonoBehaviour
             }
             
      
-            using (FileStream sw = new FileStream(i.name + ".vmesh", FileMode.CreateNew))
+            using (FileStream sw = new FileStream(names[c], FileMode.CreateNew))
             {
                 byte[] typeNumByte = new byte[4];
                 *(uint*)typeNumByte.Ptr() = typeNum;

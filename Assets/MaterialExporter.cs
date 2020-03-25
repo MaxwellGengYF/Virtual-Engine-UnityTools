@@ -18,7 +18,7 @@ public class MaterialExporter : MonoBehaviour
         //align
         public float occlusion;
     };
-    public string MaterialExport(Material mat)
+    private string MaterialExport(Material mat)
     {
         string str = "{";
         Vector4 tileOffset = mat.GetVector("_TileOffset");
@@ -49,18 +49,17 @@ public class MaterialExporter : MonoBehaviour
         return str;
     }
     public Material testMat;
+    public void PrintToFile(string targetFilePath)
+    {
+        string s = MaterialExport(testMat);
+        using (StreamWriter fs = new StreamWriter(targetFilePath, false, System.Text.Encoding.ASCII))
+        {
+            fs.Write(s);
+        }
+    }
     [EasyButtons.Button]
     void Test()
     {
-        string s = MaterialExport(testMat);
-        using (FileStream fs = new FileStream("Test.mat", FileMode.Create))
-        {
-            byte[] b = new byte[s.Length];
-            for(uint i = 0; i < b.Length; ++i)
-            {
-                b[i] = (byte)s[(int)i];
-            }
-            fs.Write(b, 0, b.Length);
-        }
+        PrintToFile("Test.mat");
     }
 }

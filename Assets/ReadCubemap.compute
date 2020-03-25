@@ -1,14 +1,24 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 #pragma kernel TexCopy
+#pragma kernel IntTexCopy UINT_INPUT
+#pragma kernel IntTexCopy UINT2_INPUT
+#pragma kernel IntTexCopy UINT4_INPUT
 
 TextureCube<float4> _MainTex; SamplerState sampler_MainTex;
 Texture2D<float4> _MainTex2D;SamplerState sampler_MainTex2D;
 uint _Count;
 uint _TargetMipLevel;
 RWStructuredBuffer<float4> _ResultBuffer;
-float4 _Directions[4];
 
+Texture2D<uint> _UIntTexture;
+Texture2D<uint2> _UInt2Texture;
+Texture2D<uint4> _UInt4Texture;
+
+RWStructuredBuffer<uint> _ResultInt1Buffer;
+RWStructuredBuffer<uint2> _ResultInt2Buffer;
+RWStructuredBuffer<uint4> _ResultInt4Buffer;
+float4 _Directions[4];
 [numthreads(8,8,1)]
 void CSMain (uint2 id : SV_DispatchThreadID)
 {
@@ -26,6 +36,21 @@ void TexCopy(uint2 id : SV_DISPATCHTHREADID)
 {
     if(id.x >= _TextureSize.x || id.y >= _TextureSize.y)
         return;
-    float2 uv = (id.xy + 0.5) / _TextureSize.zw;
-    _ResultBuffer[id.y * _Count + id.x] = _MainTex2D.SampleLevel(sampler_MainTex2D, uv, _TargetMipLevel);
+    _ResultBuffer[id.y * _Count + id.x] = _MainTex2D.Load(uint3(id.x, id.y,  _TargetMipLevel));
+}
+
+[numthreads(8, 8, 1)]
+void IntTexCopy(uint2 id : SV_DISPATCHTHREADID)
+{
+    if(id.x >= _TextureSize.x || id.y >= _TextureSize.y)
+        return;
+    #ifdef UINT_INPUT
+    _ResultInt1Buffer[id.y * _Count + id.x] = _UIntTexture.Load(uint3(id.x, id.y, 0));
+    #endif
+    #ifdef UINT2_INPUT
+    _ResultInt2Buffer[id.y * _Count + id.x] = _UInt2Texture.Load(uint3(id.x, id.y, 0));
+    #endif
+    #ifdef UINT4_INPUT
+    _ResultInt4Buffer[id.y * _Count + id.x] = _UInt4Texture.Load(uint3(id.x, id.y, 0));
+    #endif
 }

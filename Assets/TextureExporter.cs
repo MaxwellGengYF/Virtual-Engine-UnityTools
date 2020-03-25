@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
@@ -94,7 +95,10 @@ public struct TextureData
         LoadFormat_RGFLOAT16 = 4,
         LoadFormat_RG16 = 5,
         LoadFormat_BC7 = 6,
-        LoadFormat_BC6H = 7
+        LoadFormat_BC6H = 7,
+        LoadFormat_UINT = 8,
+        LoadFormat_UINT2 = 9,
+        LoadFormat_UINT4 = 10
     };
     //TODO
     //Should Have Compress Type here
@@ -236,7 +240,7 @@ public unsafe class TextureExporter : MonoBehaviour
     void PrintTex2D()
     {
         uint2 size = uint2((uint)texture.width, (uint)texture.height);
-        int mipCount = useMipMap ? min((int)(log2(size.x / 64) + 0.1), (int)(log2(size.y / 64) + 0.1)) : 1;
+        int mipCount = useMipMap ? min((int)(log2(size.x / 32) + 0.1), (int)(log2(size.y / 32) + 0.1)) : 1;
         Debug.Log(mipCount);
         TextureData data;
         data.width = size.x;
@@ -245,7 +249,7 @@ public unsafe class TextureExporter : MonoBehaviour
         data.textureType = TextureType.Tex2D;
         data.mipCount = (uint)mipCount;
         data.format = tex2DFormat;
-        NativeList<byte> lst = new NativeList<byte>((int)(size.x * size.y * 1.4), Unity.Collections.Allocator.Temp);
+        NativeList<byte> lst = new NativeList<byte>((int)(size.x * size.y * 1.4 * 8), Unity.Collections.Allocator.Temp);
         byte* headerPtr = (byte*)data.Ptr();
         for (int i = 0; i < sizeof(TextureData); ++i)
         {
@@ -262,7 +266,7 @@ public unsafe class TextureExporter : MonoBehaviour
                 compress.Compress(texture as Texture2D, (int)size.x, (int)size.y, i, cbuffer, true);
                 Graphics.ExecuteCommandBuffer(cbuffer);
                 var len = compress.GetData((int)size.x, (int)size.y, datas);
-                for(int a = 0; a < len; ++a)
+                for (int a = 0; a < len; ++a)
                 {
                     uint4 value = datas[a];
                     byte* ptr = (byte*)value.Ptr();
@@ -311,6 +315,53 @@ public unsafe class TextureExporter : MonoBehaviour
 
             compress.Dispose();
             cbuffer.Dispose();
+        }
+        else if ((int)tex2DFormat >= 8 && (int)tex2DFormat <= 10)
+        {
+            //integer texture
+
+            int pass = 0;
+            uint[] dataArray = null;
+            readCS.SetVector("_TextureSize", float4(size.x - 0.5f, size.y - 0.5f, size.x, size.y));
+            readCS.SetInt("_Count", (int)size.x);
+            ComputeBuffer cb = null;
+            switch (tex2DFormat)
+            {
+                case TextureData.LoadFormat.LoadFormat_UINT:
+                    pass = 2;
+                    dataArray = new uint[size.x * size.y];
+                    cb = new ComputeBuffer(dataArray.Length, sizeof(int));
+                    readCS.SetTexture(pass, "_UIntTexture", texture);
+                    readCS.SetBuffer(pass, "_ResultInt1Buffer", cb);
+                    break;
+                case TextureData.LoadFormat.LoadFormat_UINT2:
+                    pass = 3;
+                    dataArray = new uint[size.x * size.y * 2];
+                    cb = new ComputeBuffer(dataArray.Length, sizeof(int));
+                    readCS.SetTexture(pass, "_UInt2Texture", texture);
+                    readCS.SetBuffer(pass, "_ResultInt2Buffer", cb);
+                    break;
+                case TextureData.LoadFormat.LoadFormat_UINT4:
+                    pass = 4;
+                    dataArray = new uint[size.x * size.y * 4];
+                    cb = new ComputeBuffer(dataArray.Length, sizeof(int));
+                    readCS.SetTexture(pass, "_UInt4Texture", texture);
+                    readCS.SetBuffer(pass, "_ResultInt4Buffer", cb);
+                    break;
+            }
+            readCS.Dispatch(pass, (int)size.x / 8, (int)size.y / 8, 1);
+            cb.GetData(dataArray);
+            foreach (var i in dataArray)
+            {
+                uint p = i;
+                byte* ptr = (byte*)p.Ptr();
+                for (uint a = 0; a < sizeof(int); ++a)
+                {
+                    lst.Add(ptr[a]);
+                }
+            }
+
+            cb.Dispose();
         }
         else
         {
@@ -472,6 +523,7 @@ public unsafe class TextureExporter : MonoBehaviour
                 size /= 2;
                 size = max(size, 1);
             }
+            cb.Dispose();
         }
         byte[] finalArray = new byte[lst.Length];
         UnsafeUtility.MemCpy(finalArray.Ptr(), lst.unsafePtr, lst.Length);
@@ -481,7 +533,7 @@ public unsafe class TextureExporter : MonoBehaviour
         }
     }
     [EasyButtons.Button]
-    void Print()
+    public void Print()
     {
         if (texture.dimension == UnityEngine.Rendering.TextureDimension.Cube)
             PrintCubemap();
